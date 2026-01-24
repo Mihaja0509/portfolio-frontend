@@ -1,0 +1,41 @@
+name: portfolio_front
+description: "Mon Portfolio"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  http: ^1.5.0
+  flutter_animate: ^4.5.2
+  google_fonts: ^6.3.2
+  responsive_builder: ^0.7.1
+  rive: ^0.13.0
+  flutter_svg: ^2.2.2
+  url_launcher: ^6.3.2
+  font_awesome_flutter: ^10.12.0
+  chewie: ^1.13.0
+  video_player: ^2.10.1
+  smooth_page_indicator: ^2.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/background.jpg
+    - assets/design.jpg
+    - assets/dev.jpg
+    - assets/designEN.jpg
+    - assets/devEN.jpg
+    - assets/moi.png
+    - assets/icon/

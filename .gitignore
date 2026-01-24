@@ -1,0 +1,61 @@
+# -------------------------------------------------------------------
+# Fichiers système et divers
+# -------------------------------------------------------------------
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+.DS_Store
+
+# -------------------------------------------------------------------
+# IDE (IntelliJ, VS Code, Android Studio)
+# -------------------------------------------------------------------
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+
+# -------------------------------------------------------------------
+# Flutter / Dart
+# -------------------------------------------------------------------
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# -------------------------------------------------------------------
+# Sécurité et Environnement (NE JAMAIS SUPPRIMER)
+# -------------------------------------------------------------------
+.env
+.env.*
+*.secret
+*.jks
+*.keystore
+
+# -------------------------------------------------------------------
+# Symboles et Obfuscation
+# -------------------------------------------------------------------
+app.*.symbols
+app.*.map.json
+
+# -------------------------------------------------------------------
+# Artifacts Android
+# -------------------------------------------------------------------
+/android/app/debug
+/android/app/profile
+/android/app/release
