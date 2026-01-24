@@ -193,7 +193,7 @@ class _ContactPageState extends State<ContactPage> {
           alignment: WrapAlignment.center,
           children: [
             _socialIcon(FontAwesomeIcons.whatsapp, "https://wa.me/261322111322", Colors.greenAccent),
-            _socialIcon(FontAwesomeIcons.envelope, "mailto:votre@email.com", Colors.redAccent),
+            _socialIcon(FontAwesomeIcons.envelope, "mailto:contact@andrianina.com", Colors.redAccent),
             _socialIcon(FontAwesomeIcons.github, "https://github.com/Mihaja0509", Colors.white),
             _socialIcon(FontAwesomeIcons.linkedin, "https://www.linkedin.com/public-profile/settings?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_self_edit_contact-info%3BAvGu2y8%2BRFeKajhH2IpMIw%3D%3D", Colors.blue),
           ],
