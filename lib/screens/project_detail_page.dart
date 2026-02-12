@@ -1,4 +1,4 @@
-import 'dart:ui'; // Obligatoire pour le flou
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
@@ -57,7 +57,8 @@ class ProjectDetailPage extends StatelessWidget {
     final bool isDev = project.categorySlug == 'dev';
 
     final bool hasNativeVideo = project.videoFile != null &&
-        (project.videoFile!.toLowerCase().contains('.mp4') || project.videoFile!.toLowerCase().contains('.mov'));
+        (project.videoFile!.toLowerCase().contains('.mp4') ||
+            project.videoFile!.toLowerCase().contains('.mov'));
 
     String? mainVideoUrl = project.videoExternalUrl;
     if (mainVideoUrl == null || mainVideoUrl.isEmpty) {
@@ -155,7 +156,6 @@ class ProjectDetailPage extends StatelessWidget {
     ).animate().fadeIn(delay: 200.ms).scale(begin: const Offset(0.98, 0.98));
   }
 
-  // Cette méthode gère le fond flou pour les images portraits
   Widget _buildAdaptiveImageContainer(BuildContext context) {
     final String imageUrl = project.gallery.isNotEmpty ? project.gallery.first : (project.cardImage ?? "");
 
@@ -164,13 +164,11 @@ class ProjectDetailPage extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1. Fond flou
         Image.network(imageUrl, fit: BoxFit.cover),
         BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
           child: Container(color: Colors.black.withOpacity(0.4)),
         ),
-        // 2. Image nette au centre
         GestureDetector(
           onTap: () => _showImageDialog(context, imageUrl),
           child: Image.network(imageUrl, fit: BoxFit.contain),
@@ -203,7 +201,6 @@ class ProjectDetailPage extends StatelessWidget {
           const SizedBox(height: 60),
           _sectionHeader(lang.t("LIENS DU PROJET", "PROJECT LINKS")),
           const SizedBox(height: 25),
-          // Affichage en grille pour les liens pour éviter le vide
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -214,44 +211,73 @@ class ProjectDetailPage extends StatelessWidget {
               mainAxisSpacing: 15,
             ),
             itemCount: project.links.length,
-            itemBuilder: (context, index) => _buildEnhancedLinkButton(project.links[index]),
+            itemBuilder: (context, index) => _buildEnhancedLinkButton(project.links[index], lang),
           ),
         ],
       ],
     );
   }
 
-  // Nouveau design de bouton pour les liens (plus "rempli")
-  Widget _buildEnhancedLinkButton(ProjectLink link) {
+  Widget _buildEnhancedLinkButton(ProjectLink link, LanguageProvider lang) {
+    String displayTitle = lang.t("VOIR LE PROJET", "VIEW PROJECT");
+    if (link.label.trim().isNotEmpty) {
+      displayTitle = link.label.toUpperCase();
+    } else if (link.typeDisplay.trim().isNotEmpty) {
+      displayTitle = link.typeDisplay.toUpperCase();
+    } else if (link.type.trim().isNotEmpty) {
+      displayTitle = link.type.toUpperCase();
+    }
+
     return InkWell(
       onTap: () => _launchURL(link.url),
       borderRadius: BorderRadius.circular(15),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: Colors.blueAccent.withOpacity(0.05),
+          color: Colors.blueAccent.withOpacity(0.1),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.blueAccent.withOpacity(0.2)),
+          border: Border.all(color: Colors.blueAccent.withOpacity(0.3), width: 1.5),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1), shape: BoxShape.circle),
-              child: const Icon(Icons.link, color: Colors.blueAccent, size: 20),
+              decoration: BoxDecoration(
+                  color: Colors.blueAccent.withOpacity(0.2),
+                  shape: BoxShape.circle
+              ),
+              child: Icon(
+                  _getLinkIcon(link.type),
+                  color: Colors.blueAccent,
+                  size: 20
+              ),
             ),
             const SizedBox(width: 15),
             Expanded(
               child: Text(
-                link.label.isNotEmpty ? link.label.toUpperCase() : link.typeDisplay.toUpperCase(),
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2),
+                displayTitle,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                    letterSpacing: 1.1,
+                    decoration: TextDecoration.none
+                ),
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 14),
+            const Icon(Icons.open_in_new, color: Colors.blueAccent, size: 16),
           ],
         ),
       ),
     );
+  }
+
+  IconData _getLinkIcon(String type) {
+    type = type.toLowerCase();
+    if (type.contains('github') || type.contains('code')) return Icons.code;
+    if (type.contains('video') || type.contains('demo')) return Icons.play_circle_outline;
+    if (type.contains('web') || type.contains('site')) return Icons.language;
+    return Icons.link;
   }
 
   Widget _buildGalleryGrid(BuildContext context, bool isMobile) {
@@ -272,7 +298,6 @@ class ProjectDetailPage extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15),
-            // Ici aussi on peut mettre BoxFit.contain pour la grille si tu préfères
             child: Image.network(project.gallery[index], fit: BoxFit.cover),
           ),
         ),
@@ -280,7 +305,6 @@ class ProjectDetailPage extends StatelessWidget {
     );
   }
 
-  // --- WIDGETS DE STYLE ---
   Widget _sectionHeader(String title) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
     Text(title, style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 13, decoration: TextDecoration.none)),
     const SizedBox(height: 8),
@@ -333,18 +357,20 @@ class _NativeVideoPlayerState extends State<NativeVideoPlayer> {
     super.initState();
     _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(widget.url))
       ..initialize().then((_) {
-        setState(() {
-          _chewieController = ChewieController(
-            videoPlayerController: _videoPlayerController,
-            aspectRatio: _videoPlayerController.value.aspectRatio,
-            autoPlay: false,
-            allowFullScreen: true,
-            materialProgressColors: ChewieProgressColors(
-              playedColor: Colors.blueAccent,
-              handleColor: Colors.blueAccent,
-            ),
-          );
-        });
+        if (mounted) {
+          setState(() {
+            _chewieController = ChewieController(
+              videoPlayerController: _videoPlayerController,
+              aspectRatio: _videoPlayerController.value.aspectRatio,
+              autoPlay: false,
+              allowFullScreen: true,
+              materialProgressColors: ChewieProgressColors(
+                playedColor: Colors.blueAccent,
+                handleColor: Colors.blueAccent,
+              ),
+            );
+          });
+        }
       });
   }
 
