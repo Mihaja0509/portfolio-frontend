@@ -195,7 +195,7 @@ class _ContactPageState extends State<ContactPage> {
             _socialIcon(FontAwesomeIcons.whatsapp, "https://wa.me/261322111322", Colors.greenAccent),
             _socialIcon(FontAwesomeIcons.envelope, "mailto:contact@andrianina.com", Colors.redAccent),
             _socialIcon(FontAwesomeIcons.github, "https://github.com/Mihaja0509", Colors.white),
-            _socialIcon(FontAwesomeIcons.linkedin, "www.linkedin.com/in/andrianina-mihaja-rakotoharinivo-43b5a3389", Colors.blue),
+            _socialIcon(FontAwesomeIcons.linkedin, "https://www.linkedin.com/in/andrianina-mihaja-rakotoharinivo-43b5a3389", Colors.blue),
           ],
         ),
       ],
