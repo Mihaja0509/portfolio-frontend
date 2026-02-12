@@ -299,7 +299,7 @@ class _HomePageState extends State<HomePage> {
     return Wrap(spacing: 25, runSpacing: 15, alignment: isMobile ? WrapAlignment.center : WrapAlignment.start, children: [
       _contactItem(FontAwesomeIcons.envelope, "Email", "mailto:contact@andrianina.com"),
       _contactItem(FontAwesomeIcons.whatsapp, "WhatsApp", "https://wa.me/261322111322"),
-      _contactItem(FontAwesomeIcons.linkedin, "LinkedIn", "https://www.linkedin.com/public-profile/settings?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_self_edit_contact-info%3BAvGu2y8%2BRFeKajhH2IpMIw%3D%3D"),
+      _contactItem(FontAwesomeIcons.linkedin, "LinkedIn", "www.linkedin.com/in/andrianina-mihaja-rakotoharinivo-43b5a3389"),
       _contactItem(FontAwesomeIcons.github, "GitHub", "https://github.com/Mihaja0509"),
     ]);
   }

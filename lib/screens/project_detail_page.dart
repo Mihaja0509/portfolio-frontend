@@ -1,3 +1,4 @@
+import 'dart:ui'; // Obligatoire pour le flou
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,6 @@ class ProjectDetailPage extends StatelessWidget {
   final Project project;
 
   const ProjectDetailPage({super.key, required this.project});
-
 
   void _showImageDialog(BuildContext context, String imageUrl) {
     showDialog(
@@ -92,7 +92,6 @@ class ProjectDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Titre Responsive
                     Text(
                       project.currentTitle(isFrench).toUpperCase(),
                       style: TextStyle(
@@ -108,10 +107,8 @@ class ProjectDetailPage extends StatelessWidget {
                     _buildCategoryBadge(isDev ? lang.t("DÉVELOPPEMENT", "DEVELOPMENT") : "CREATIVE DESIGN"),
                     const SizedBox(height: 40),
 
-                    // SECTION MÉDIA
                     _buildPriorityMedia(context, hasNativeVideo, mainVideoUrl, lang, isMobile),
 
-                    // BOUTON YOUTUBE / EXTERNE
                     if (!hasNativeVideo && mainVideoUrl != null && mainVideoUrl.isNotEmpty) ...[
                       const SizedBox(height: 30),
                       _buildExternalVideoButton(mainVideoUrl, lang, isMobile),
@@ -120,7 +117,6 @@ class ProjectDetailPage extends StatelessWidget {
                     const SizedBox(height: 60),
                     _buildMainContent(context, lang, isMobile),
 
-                    // Galerie Grid Responsive
                     if (project.gallery.isNotEmpty) ...[
                       const SizedBox(height: 80),
                       _sectionHeader(lang.t("GALERIE DU PROJET", "PROJECT GALLERY")),
@@ -139,108 +135,47 @@ class ProjectDetailPage extends StatelessWidget {
     });
   }
 
-
   Widget _buildPriorityMedia(BuildContext context, bool hasNativeVideo, String? externalUrl, LanguageProvider lang, bool isMobile) {
-    Widget content;
-    if (hasNativeVideo) {
-      content = NativeVideoPlayer(url: project.videoFile!);
-    } else if (project.gallery.isNotEmpty) {
-      content = _buildGallerySlider(context, externalUrl, lang);
-    } else {
-      content = _buildHeroImage();
-    }
-
-    return Container(
-      constraints: BoxConstraints(maxHeight: isMobile ? 300 : 600),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isMobile ? 15 : 30),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 30, offset: const Offset(0, 15))],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(isMobile ? 15 : 30),
-        child: content,
+    return Center(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(isMobile ? 15 : 30),
+          boxShadow: [BoxShadow(color: Colors.blueAccent.withOpacity(0.1), blurRadius: 50, spreadRadius: -10)],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(isMobile ? 15 : 30),
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: hasNativeVideo
+                ? NativeVideoPlayer(url: project.videoFile!)
+                : _buildAdaptiveImageContainer(context),
+          ),
+        ),
       ),
     ).animate().fadeIn(delay: 200.ms).scale(begin: const Offset(0.98, 0.98));
   }
 
-  Widget _buildGallerySlider(BuildContext context, String? externalUrl, LanguageProvider lang) {
-    final PageController controller = PageController();
+  // Cette méthode gère le fond flou pour les images portraits
+  Widget _buildAdaptiveImageContainer(BuildContext context) {
+    final String imageUrl = project.gallery.isNotEmpty ? project.gallery.first : (project.cardImage ?? "");
+
+    if (imageUrl.isEmpty) return const Center(child: Icon(Icons.broken_image, color: Colors.white24));
+
     return Stack(
+      fit: StackFit.expand,
       children: [
-        PageView.builder(
-          controller: controller,
-          itemCount: project.gallery.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () => _showImageDialog(context, project.gallery[index]),
-              child: Image.network(project.gallery[index], fit: BoxFit.cover, alignment: Alignment.center),
-            );
-          },
+        // 1. Fond flou
+        Image.network(imageUrl, fit: BoxFit.cover),
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: Container(color: Colors.black.withOpacity(0.4)),
         ),
-        if (project.gallery.length > 1) ...[
-          _sliderNavBtn(Icons.arrow_back_ios_new, () => controller.previousPage(duration: 300.ms, curve: Curves.easeInOut), true),
-          _sliderNavBtn(Icons.arrow_forward_ios, () => controller.nextPage(duration: 300.ms, curve: Curves.easeInOut), false),
-        ],
+        // 2. Image nette au centre
+        GestureDetector(
+          onTap: () => _showImageDialog(context, imageUrl),
+          child: Image.network(imageUrl, fit: BoxFit.contain),
+        ),
       ],
-    );
-  }
-
-  Widget _sliderNavBtn(IconData icon, VoidCallback onTap, bool isLeft) {
-    return Positioned(
-      left: isLeft ? 10 : null, right: isLeft ? null : 10,
-      top: 0, bottom: 0,
-      child: Center(
-        child: IconButton(
-          icon: Icon(icon, color: Colors.white, size: 24),
-          onPressed: onTap,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExternalVideoButton(String url, LanguageProvider lang, bool isMobile) {
-    return Center(
-      child: ElevatedButton.icon(
-        onPressed: () => _launchURL(url),
-        icon: const Icon(Icons.play_circle_fill, size: 24),
-        label: Text(lang.t("VOIR LA DÉMO", "WATCH DEMO")),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
-          foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 30 : 50, vertical: 20),
-          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        ),
-      ),
-    ).animate().fadeIn(delay: 400.ms);
-  }
-
-  Widget _buildGalleryGrid(BuildContext context, bool isMobile) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: isMobile ? 1 : 2,
-        mainAxisSpacing: 20, crossAxisSpacing: 20, childAspectRatio: 1.6,
-      ),
-      itemCount: project.gallery.length,
-      itemBuilder: (context, index) => GestureDetector(
-        onTap: () => _showImageDialog(context, project.gallery[index]),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
-          child: Image.network(project.gallery[index], fit: BoxFit.cover),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeroImage() {
-    return Container(
-      width: double.infinity, color: const Color(0xFF112240),
-      child: project.cardImage != null
-          ? Image.network(project.cardImage!, fit: BoxFit.contain)
-          : const Center(child: Icon(Icons.broken_image, color: Colors.white24, size: 50)),
     );
   }
 
@@ -263,51 +198,122 @@ class ProjectDetailPage extends StatelessWidget {
         _sectionHeader("TECH STACK"),
         const SizedBox(height: 20),
         Wrap(spacing: 10, runSpacing: 10, children: project.tools.map((t) => _buildToolChip(t.name)).toList()),
+
         if (project.links.isNotEmpty) ...[
-          const SizedBox(height: 50),
+          const SizedBox(height: 60),
           _sectionHeader(lang.t("LIENS DU PROJET", "PROJECT LINKS")),
-          const SizedBox(height: 20),
-          ...project.links.map((link) => _buildLinkButton(link)),
+          const SizedBox(height: 25),
+          // Affichage en grille pour les liens pour éviter le vide
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isMobile ? 1 : 2,
+              mainAxisExtent: 70,
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
+            ),
+            itemCount: project.links.length,
+            itemBuilder: (context, index) => _buildEnhancedLinkButton(project.links[index]),
+          ),
         ],
       ],
     );
   }
 
-  Widget _buildLinkButton(ProjectLink link) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: OutlinedButton.icon(
-        onPressed: () => _launchURL(link.url),
-        icon: const Icon(Icons.launch, size: 18),
-        label: Text(link.label.isNotEmpty ? link.label.toUpperCase() : link.typeDisplay.toUpperCase(),
-            style: const TextStyle(decoration: TextDecoration.none)),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.blueAccent,
-          side: const BorderSide(color: Colors.blueAccent, width: 1.5),
-          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  // Nouveau design de bouton pour les liens (plus "rempli")
+  Widget _buildEnhancedLinkButton(ProjectLink link) {
+    return InkWell(
+      onTap: () => _launchURL(link.url),
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.blueAccent.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: Colors.blueAccent.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1), shape: BoxShape.circle),
+              child: const Icon(Icons.link, color: Colors.blueAccent, size: 20),
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Text(
+                link.label.isNotEmpty ? link.label.toUpperCase() : link.typeDisplay.toUpperCase(),
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2),
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 14),
+          ],
         ),
       ),
     );
   }
 
+  Widget _buildGalleryGrid(BuildContext context, bool isMobile) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isMobile ? 1 : 2,
+        mainAxisSpacing: 20, crossAxisSpacing: 20, childAspectRatio: 1.6,
+      ),
+      itemCount: project.gallery.length,
+      itemBuilder: (context, index) => GestureDetector(
+        onTap: () => _showImageDialog(context, project.gallery[index]),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            // Ici aussi on peut mettre BoxFit.contain pour la grille si tu préfères
+            child: Image.network(project.gallery[index], fit: BoxFit.cover),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --- WIDGETS DE STYLE ---
   Widget _sectionHeader(String title) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
     Text(title, style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 13, decoration: TextDecoration.none)),
     const SizedBox(height: 8),
-    Container(width: 40, height: 2, color: Colors.blueAccent.withOpacity(0.5)),
+    Container(width: 40, height: 2, color: Colors.blueAccent),
   ]);
 
   Widget _buildToolChip(String label) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-    decoration: BoxDecoration(color: const Color(0xFF112240), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.blueAccent.withOpacity(0.2))),
-    child: Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12, decoration: TextDecoration.none)),
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+    decoration: BoxDecoration(color: const Color(0xFF112240), borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.blueAccent.withOpacity(0.2))),
+    child: Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500)),
   );
 
   Widget _buildCategoryBadge(String label) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
-    child: Text(label, style: const TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.w800, decoration: TextDecoration.none)),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.blueAccent.withOpacity(0.3))),
+    child: Text(label, style: const TextStyle(color: Colors.blueAccent, fontSize: 11, fontWeight: FontWeight.w800)),
   );
+
+  Widget _buildExternalVideoButton(String url, LanguageProvider lang, bool isMobile) {
+    return Center(
+      child: ElevatedButton.icon(
+        onPressed: () => _launchURL(url),
+        icon: const Icon(Icons.play_circle_fill, size: 24),
+        label: Text(lang.t("VOIR LA DÉMO", "WATCH DEMO")),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.redAccent,
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 30 : 50, vertical: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        ),
+      ),
+    );
+  }
 }
 
 class NativeVideoPlayer extends StatefulWidget {
