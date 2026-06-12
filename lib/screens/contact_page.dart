@@ -202,7 +202,7 @@ class _ContactPageState extends State<ContactPage> {
     );
   }
 
-  Widget _socialIcon(IconData icon, String url, Color hoverColor) {
+  Widget _socialIcon(dynamic icon, String url, Color hoverColor) {
     return IconButton(
       onPressed: () => _launchURL(url),
       icon: FaIcon(icon, color: Colors.white70, size: 28),

@@ -304,7 +304,7 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
-  Widget _contactItem(IconData icon, String text, String url) {
+  Widget _contactItem(dynamic icon, String text, String url) {
     return InkWell(onTap: () => _launchURL(url), borderRadius: BorderRadius.circular(8), child: Padding(padding: const EdgeInsets.all(4.0), child: Row(mainAxisSize: MainAxisSize.min, children: [FaIcon(icon, color: Colors.blueAccent, size: 18), const SizedBox(width: 10), Text(text, style: const TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w500))])));
   }
 }

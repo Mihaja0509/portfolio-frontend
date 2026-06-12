@@ -18,7 +18,7 @@ dependencies:
   rive: ^0.13.0
   flutter_svg: ^2.2.2
   url_launcher: ^6.3.2
-  font_awesome_flutter: ^10.12.0
+  font_awesome_flutter: ^11.0.0
   chewie: ^1.13.0
   video_player: ^2.10.1
   smooth_page_indicator: ^2.0.1
